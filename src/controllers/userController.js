@@ -3,6 +3,8 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const getUserProfile = async (req, res) => {
   try {
+    console.log("before check!");
+
     const userId = req.user?.userId;
     if (!userId) {
       return res.status(401).json({ message: "Unauthorized" });
@@ -23,7 +25,7 @@ const getUserProfile = async (req, res) => {
 
     res.json(user);
   } catch (err) {
-    res.status(500).json({ message: "Server error", error: err.message });
+    res.status(500).json({ message: "Server error" });
   }
 };
 module.exports = { getUserProfile };

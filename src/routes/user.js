@@ -1,5 +1,5 @@
-const { getUserProfile } = require("../controllers/UserController.js");
-const { JWTAuthMiddleware } = require("../middleware/JWTAuthMiddleware.js");
+const { getUserProfile } = require("../controllers/index.js");
+const { JWTAuthMiddleware } = require("../middleware/jwtAuthMiddleware.js");
 const express = require("express");
 
 const userRouter = express.Router();
@@ -8,12 +8,12 @@ const userRouter = express.Router();
  * @swagger
  * /user/profile:
  *   get:
- *     summary: دریافت پروفایل کاربر
+ *     summary: get user profile
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: اطلاعات پروفایل کاربر
+ *         description: information about the user
  *       401:
  *         description: Unauthorized
  */

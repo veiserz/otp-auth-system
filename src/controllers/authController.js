@@ -6,16 +6,19 @@ const { redisClient } = require("../config/redis.js");
 
 const prisma = new PrismaClient();
 
+const { generateRandomNumber } = require("../utils/generateRandomNumber.js");
+
 const requestOtp = async (req, res) => {
   const { mobile } = req.body;
-  if (!mobile) return res.status(400).json({ message: "Mobile is required" });
+  console.log(`Requesting OTP for mobile: ${mobile}`);
 
-  // تولید OTP تصادفی 6 رقمی
-  const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+  if (!mobile) return res.status(400).json({ message: "Mobile is required" });
+  const numbergenerate = 6;
+  const otpCode = generateRandomNumber(numbergenerate).toString();
   console.log(`OTP for ${mobile}: ${otpCode}`);
 
-  // ذخیره OTP در Redis با TTL (مثلاً 2 دقیقه)
-  await redisClient.setEx(`otp:${mobile}`, 120, otpCode);
+  const OTP_EXPIRY_SECONDS = 120;
+  await redisClient.setEx(`otp:${mobile}`, OTP_EXPIRY_SECONDS, otpCode);
 
   res.json({ message: "OTP sent (check logs)" });
 };
@@ -25,15 +28,12 @@ const verifyOtp = async (req, res) => {
   if (!mobile || !code)
     return res.status(400).json({ message: "Mobile and code are required" });
 
-  // خواندن OTP از Redis
   const redisCode = await redisClient.get(`otp:${mobile}`);
 
-  // بررسی صحت OTP
   if (!redisCode || code !== redisCode) {
     return res.status(400).json({ message: "Invalid or expired OTP" });
   }
 
-  // حذف OTP پس از استفاده
   await redisClient.del(`otp:${mobile}`);
   console.log("before user");
 
@@ -44,11 +44,15 @@ const verifyOtp = async (req, res) => {
     });
   }
 
-  const token = jwt.sign(
-    { userId: user.id, mobile: user.mobile },
-    process.env.JWT_SECRET || "secret",
-    { expiresIn: "1d" }
-  );
+  // Ensure JWT_SECRET is set and consistent across all APIs
+  const jwtSecret = process.env.JWT_SECRET;
+  if (!jwtSecret) {
+    return res.status(500).json({ message: "JWT secret is not configured" });
+  }
+
+  const token = jwt.sign({ userId: user.id, mobile: user.mobile }, jwtSecret, {
+    expiresIn: "1d",
+  });
 
   res.json({ token });
 };

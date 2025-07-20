@@ -1,12 +1,12 @@
 const express = require("express");
-const { requestOtp, verifyOtp } = require("../controllers/AuthController.js");
+const { requestOtp, verifyOtp } = require("../controllers/index.js");
 const {
   RateLimiterMiddleware,
-} = require("../middleware/RateLimiterMiddleware.js");
+} = require("../middleware/rateLimiterMiddleware.js");
 const {
   validateOtpRequest,
   validateOtpVerify,
-} = require("../middleware/Validation Middleware.js");
+} = require("../middleware/validationMiddleware.js");
 
 const otpRoutes = express.Router();
 
@@ -14,7 +14,7 @@ const otpRoutes = express.Router();
  * @swagger
  * /otp/request:
  *   post:
- *     summary: ارسال درخواست OTP
+ *     summary: request OTP
  *     requestBody:
  *       required: true
  *       content:
@@ -41,7 +41,7 @@ otpRoutes.post(
  * @swagger
  * /otp/verify:
  *   post:
- *     summary: تایید کد OTP
+ *     summary: verify OTP
  *     requestBody:
  *       required: true
  *       content:
